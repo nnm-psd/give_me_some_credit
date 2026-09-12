@@ -15,10 +15,14 @@ import pickle
 import shutil
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import yaml
+from sklearn.metrics import roc_curve
 
 from src.data.clean import clean, split
 from src.data.load import FEATURE_COLS, TARGET_COL, load_raw
+from src.data.profile import compute_data_profile
 from src.features.binning import FeatureBinner
 from src.features.select import compute_vif, flag_suspicious_iv, select_by_iv
 from src.models.evaluate import (
@@ -82,11 +86,31 @@ def run(config_path: str | Path = "config/give_me_some_credit.yaml") -> dict:
     }
 
     calib = calibration_table(test_df[TARGET_COL], pd_test, n_bins=n_calib_bins)
-    _save_artifacts(config_path, binner, scorecard, metrics, calib)
+
+    # Aggregate-only artifacts (histogram bin counts, describe() stats, ROC
+    # curve points) — never the raw rows — so the app's Data Overview and
+    # Model Performance ROC chart work without the raw CSV present (e.g. on a
+    # hosted deployment). See src/data/profile.py's docstring for why this is
+    # safe to commit when the raw Kaggle data itself is not.
+    data_profile = compute_data_profile(df, target_col=TARGET_COL, feature_cols=FEATURE_COLS)
+    roc_points = _roc_curve_points(test_df[TARGET_COL], pd_test)
+
+    _save_artifacts(config_path, binner, scorecard, metrics, calib, data_profile, roc_points)
     return metrics
 
 
-def _save_artifacts(config_path, binner, scorecard, metrics, calib_table) -> None:
+def _roc_curve_points(y_true, y_score, n_points: int = 200) -> pd.DataFrame:
+    """ROC curve downsampled to a fixed FPR grid — sklearn returns one point per
+    unique score (tens of thousands here), far more than a chart needs."""
+    fpr, tpr, _ = roc_curve(y_true, y_score)
+    grid = np.linspace(0, 1, n_points)
+    tpr_grid = np.interp(grid, fpr, tpr)
+    return pd.DataFrame({"fpr": grid, "tpr": tpr_grid})
+
+
+def _save_artifacts(
+    config_path, binner, scorecard, metrics, calib_table, data_profile, roc_points
+) -> None:
     ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 
     with open(ARTIFACT_DIR / "binner.pkl", "wb") as f:
@@ -95,7 +119,10 @@ def _save_artifacts(config_path, binner, scorecard, metrics, calib_table) -> Non
         pickle.dump(scorecard, f)
     with open(ARTIFACT_DIR / "metrics.json", "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
+    with open(ARTIFACT_DIR / "data_profile.json", "w", encoding="utf-8") as f:
+        json.dump(data_profile, f, indent=2)
     calib_table.to_csv(ARTIFACT_DIR / "calibration_table.csv", index=False)
+    roc_points.to_csv(ARTIFACT_DIR / "roc_curve.csv", index=False)
     shutil.copy(config_path, ARTIFACT_DIR / "config.yaml")
 
 

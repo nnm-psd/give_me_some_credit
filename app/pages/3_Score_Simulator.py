@@ -10,10 +10,10 @@ import streamlit as st
 from app.components.loaders import (
     FEATURE_COLS,
     artifacts_available,
+    data_profile_available,
     load_binner,
-    load_raw_data,
+    load_data_profile,
     load_scorecard,
-    raw_data_available,
 )
 
 st.set_page_config(page_title="Score Simulator", layout="wide")
@@ -31,13 +31,12 @@ binner = load_binner()
 scorecard = load_scorecard()
 selected_features = scorecard.feature_names_
 
-# Defaults/bounds come from the real training data, not hardcoded guesses —
-# see docs/plans/0002-streamlit-app.md §6.
-defaults = {}
-if raw_data_available():
-    df = load_raw_data()
-    for f in FEATURE_COLS:
-        defaults[f] = float(df[f].median())
+# Defaults come from the real training data's median (via data_profile.json's
+# describe() stats — see src/data/profile.py), not hardcoded guesses, and not
+# a dependency on the raw CSV being present — see docs/plans/0002-streamlit-app.md §6.
+if data_profile_available():
+    profile = load_data_profile()
+    defaults = {f: float(profile["features"][f]["describe"]["50%"]) for f in FEATURE_COLS}
 else:
     defaults = {f: 0.0 for f in FEATURE_COLS}
 

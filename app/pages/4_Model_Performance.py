@@ -6,18 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import streamlit as st
 
 from app.components.charts import STATUS_COLOR, calibration_chart, roc_chart
-from app.components.loaders import (
-    FEATURE_COLS,
-    TARGET_COL,
-    artifacts_available,
-    load_binner,
-    load_calibration_table,
-    load_metrics,
-    load_raw_data,
-    load_scorecard,
-    raw_data_available,
-)
-from src.data.clean import clean, split
+from app.components.loaders import artifacts_available, load_calibration_table, load_metrics, load_roc_curve
 
 st.set_page_config(page_title="Model Performance", layout="wide")
 st.title("Model Performance")
@@ -42,16 +31,10 @@ col3.metric("KS (test)", f"{disc['test']['ks']:.3f}", help=f"train: {disc['train
 st.divider()
 
 st.subheader("ROC curve (test set)")
-if raw_data_available():
-    df = clean(load_raw_data())
-    _, test_df = split(df, test_size=0.3, seed=42)  # must mirror config/give_me_some_credit.yaml
-    binner = load_binner()
-    scorecard = load_scorecard()
-    woe_test = binner.transform(test_df[FEATURE_COLS])
-    pd_test = scorecard.predict_pd(woe_test)
-    st.plotly_chart(roc_chart(test_df[TARGET_COL], pd_test, disc["test"]["auc"]), use_container_width=True)
-else:
-    st.info("Raw data not available — cannot recompute the ROC curve points (AUC/Gini/KS above are still exact, from the saved metrics).")
+roc_points = load_roc_curve()
+st.plotly_chart(
+    roc_chart(roc_points["fpr"], roc_points["tpr"], disc["test"]["auc"]), use_container_width=True
+)
 
 st.divider()
 

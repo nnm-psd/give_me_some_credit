@@ -32,6 +32,10 @@ def raw_data_available() -> bool:
     return RAW_DATA_PATH.exists()
 
 
+def data_profile_available() -> bool:
+    return (ARTIFACT_DIR / "data_profile.json").exists()
+
+
 @st.cache_data(show_spinner="Loading raw data...")
 def load_raw_data() -> pd.DataFrame:
     return load_raw(RAW_DATA_PATH)
@@ -60,14 +64,30 @@ def load_calibration_table() -> pd.DataFrame:
     return pd.read_csv(ARTIFACT_DIR / "calibration_table.csv")
 
 
+@st.cache_data(show_spinner=False)
+def load_data_profile() -> dict:
+    """The aggregate-only data summary (histograms, describe(), missing rates) —
+    see src/data/profile.py. Works without the raw CSV present (e.g. hosted)."""
+    with open(ARTIFACT_DIR / "data_profile.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+@st.cache_data(show_spinner=False)
+def load_roc_curve() -> pd.DataFrame:
+    return pd.read_csv(ARTIFACT_DIR / "roc_curve.csv")
+
+
 __all__ = [
     "FEATURE_COLS",
     "TARGET_COL",
     "artifacts_available",
     "raw_data_available",
+    "data_profile_available",
     "load_raw_data",
     "load_binner",
     "load_scorecard",
     "load_metrics",
     "load_calibration_table",
+    "load_data_profile",
+    "load_roc_curve",
 ]

@@ -14,7 +14,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from sklearn.metrics import roc_curve
 
 BLUE = "#2a78d6"    # diverging pole: safer / positive WOE; categorical slot 1
 RED = "#e34948"     # diverging pole: riskier / negative WOE; categorical slot 8
@@ -71,9 +70,13 @@ def woe_bar_chart(binning_table: pd.DataFrame, feature_name: str) -> go.Figure:
     return fig
 
 
-def roc_chart(y_true, y_score, auc: float) -> go.Figure:
-    """ROC curve (blue) against the chance diagonal (dashed muted gray)."""
-    fpr, tpr, thresholds = roc_curve(y_true, y_score)
+def roc_chart(fpr, tpr, auc: float) -> go.Figure:
+    """ROC curve (blue) against the chance diagonal (dashed muted gray).
+
+    Takes precomputed (fpr, tpr) points — saved by src/pipeline/train.py as
+    models/give-me-some-credit/roc_curve.csv — rather than raw predictions,
+    so this chart never needs the raw data or a live model call to render.
+    """
     hover = [f"FPR: {f:.3f}<br>TPR: {t:.3f}" for f, t in zip(fpr, tpr)]
 
     fig = go.Figure()
@@ -141,6 +144,26 @@ def histogram(series: pd.Series, title: str, nbins: int = 40) -> go.Figure:
     fig.update_layout(
         title=title,
         xaxis=dict(title=series.name, **_AXIS_STYLE),
+        yaxis=dict(title="Count", **_AXIS_STYLE),
+        plot_bgcolor="#fcfcfb",
+        paper_bgcolor="#fcfcfb",
+        font=dict(color=INK),
+        showlegend=False,
+        margin=dict(t=48, b=40),
+        bargap=0.02,
+    )
+    return fig
+
+
+def histogram_from_bins(counts: list[float], bin_edges: list[float], title: str, x_title: str) -> go.Figure:
+    """Distribution histogram from precomputed bin counts (src/data/profile.py) —
+    used when the raw values themselves aren't available (e.g. hosted deployment)."""
+    centers = [(bin_edges[i] + bin_edges[i + 1]) / 2 for i in range(len(bin_edges) - 1)]
+    widths = [bin_edges[i + 1] - bin_edges[i] for i in range(len(bin_edges) - 1)]
+    fig = go.Figure(go.Bar(x=centers, y=counts, width=widths, marker_color=BLUE))
+    fig.update_layout(
+        title=title,
+        xaxis=dict(title=x_title, **_AXIS_STYLE),
         yaxis=dict(title="Count", **_AXIS_STYLE),
         plot_bgcolor="#fcfcfb",
         paper_bgcolor="#fcfcfb",
