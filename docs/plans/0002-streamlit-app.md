@@ -125,7 +125,28 @@ now), no "retrain from the UI" button. These are separate decisions if you want 
 6. `pages/4_Model_Performance.py` — needs 0001's saved metrics
 7. `Home.py` wiring it together
 
-## 11. Sequencing recommendation
+## 11. Deployment note — this app requires Python 3.12 on Streamlit Community Cloud
+
+Discovered after deployment (documented here so it isn't lost on a future redeploy):
+**`optbinning==0.21.0` pins `ortools<9.12,>=9.4` (verified via `pypi.org/pypi/optbinning/json`),
+and — verified via `pypi.org/pypi/ortools/json` — no `ortools` release in that range has ever
+published a `cp314` wheel; the first release with Python 3.14 wheels is `9.15.6755`, which
+`optbinning` doesn't allow.** On Streamlit Cloud's default Python (3.14 as of this writing), `pip
+install -r requirements.txt` for this repo cannot succeed, which surfaces as the generic "Oh no.
+Error running app" page — not a code bug, a Python-version/dependency-availability mismatch.
+
+**Fix:** deploy this app under **Python 3.12** (what it's developed and tested against locally),
+set explicitly — per Streamlit's own docs, Python version is chosen only via **"Advanced
+settings" at deploy time**, there is no `runtime.txt`/config-file mechanism for it, and **it
+cannot be changed on an already-deployed app** (delete and redeploy is the only way to change it).
+When (re)deploying: New app → this repo → `main` → `app/Home.py` → **Advanced settings → Python
+version → 3.12** → Deploy.
+
+The `scikit-learn>=1.7.2,<1.8` pin in `requirements.txt` (see its comment) is a separate, still-
+necessary fix for a different issue (a removed `sklearn` kwarg `optbinning` still calls) — keep
+both fixes; neither alone is sufficient.
+
+## 12. Sequencing recommendation
 
 Pages 2–4 have nothing real to show until Plan 0001 has actually run and produced artifacts.
 **Recommendation: finish Plan 0001 first** (through its step 4.9 tests passing and the model card
