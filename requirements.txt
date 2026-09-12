@@ -1,10 +1,16 @@
 pandas>=2.2
 numpy>=1.26
-scikit-learn>=1.4
+# Pinned below 1.8: optbinning 0.21.0 still calls sklearn's check_array with the
+# old `force_all_finite` kwarg internally, which sklearn removed in 1.8 (renamed
+# to `ensure_all_finite` in 1.6, removed two minor versions later). >=1.7.2 is
+# the earliest release with Python 3.14 wheels (Streamlit Cloud's current
+# runtime) — 1.7.2 is the only version satisfying both constraints at once.
+# See docs/plans/0002-streamlit-app.md's deployment fix note.
+scikit-learn>=1.7.2,<1.8
 scipy>=1.12
 matplotlib>=3.8
 seaborn>=0.13
-optbinning>=0.19
+optbinning==0.21.0
 pyyaml>=6.0
 pytest>=8.0
 streamlit>=1.38

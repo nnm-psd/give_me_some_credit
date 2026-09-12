@@ -19,7 +19,7 @@
     "NumberOfTime30-59DaysPastDueNotWorse"
   ],
   "iv_summary": {
-    "RevolvingUtilizationOfUnsecuredLines": 1.1137599278903423,
+    "RevolvingUtilizationOfUnsecuredLines": 1.1137633193724386,
     "NumberOfTimes90DaysLate": 0.8515145626124901,
     "NumberOfTime30-59DaysPastDueNotWorse": 0.7275349112550612,
     "age": 0.24762858052717704,
@@ -31,35 +31,35 @@
     "NumberOfDependents": 0.03569189011153519
   },
   "vif": {
-    "RevolvingUtilizationOfUnsecuredLines": 1.2910686988298987,
-    "NumberOfOpenCreditLinesAndLoans": 1.1951919638241486,
-    "age": 1.1580686843107395,
-    "NumberOfDependents": 1.141733529747212,
-    "NumberOfTimes90DaysLate": 1.139964282329377,
-    "NumberOfTime30-59DaysPastDueNotWorse": 1.126944667605964,
-    "NumberRealEstateLoansOrLines": 1.1207777714532206,
-    "MonthlyIncome": 1.101636048387138,
-    "DebtRatio": 1.0993438706301073,
-    "NumberOfTime60-89DaysPastDueNotWorse": 1.019594769237622
+    "RevolvingUtilizationOfUnsecuredLines": 1.2910642202699092,
+    "NumberOfOpenCreditLinesAndLoans": 1.1951906360752083,
+    "age": 1.1580672764120616,
+    "NumberOfDependents": 1.141733784135203,
+    "NumberOfTimes90DaysLate": 1.139964039967417,
+    "NumberOfTime30-59DaysPastDueNotWorse": 1.1269451387738914,
+    "NumberRealEstateLoansOrLines": 1.1207780102611358,
+    "MonthlyIncome": 1.1016358808361473,
+    "DebtRatio": 1.099342019824953,
+    "NumberOfTime60-89DaysPastDueNotWorse": 1.0195947570584545
   },
   "discrimination": {
     "train": {
-      "auc": 0.8509510268228908,
-      "gini": 0.7019020536457816,
+      "auc": 0.8509512478717899,
+      "gini": 0.7019024957435798,
       "ks": 0.5483057359551295
     },
     "test": {
-      "auc": 0.8500146692391763,
-      "gini": 0.7000293384783527,
+      "auc": 0.8500148354942482,
+      "gini": 0.7000296709884963,
       "ks": 0.5490724170358691
     }
   },
   "hosmer_lemeshow_test": {
-    "statistic": 35.384073442345155,
-    "p_value": 2.2756718187966207e-05
+    "statistic": 35.383316650826615,
+    "p_value": 2.2763956591953516e-05
   },
   "psi_train_vs_test": {
-    "value": 0.0001605514378417859,
+    "value": 0.0001586271375055291,
     "interpretation": "stable"
   }
 }
