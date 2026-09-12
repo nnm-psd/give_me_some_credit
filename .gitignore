@@ -21,3 +21,11 @@ models/**/*.json
 !models/give-me-some-credit/*.json
 
 .ipynb_checkpoints/
+
+# Personal interview-prep documents — generated locally, deliberately not
+# committed (per user request). HTML sources kept alongside for regenerating
+# the PDF later (open in a browser and print, or headless-print to PDF).
+docs/project-overview-vi.pdf
+docs/project-overview-en.pdf
+docs/project-overview-vi.html
+docs/project-overview-en.html
