@@ -1,0 +1,32 @@
+# Parameters for the Give Me Some Credit PD scorecard (Plan 0001).
+# Every run of src/pipeline/train.py reads this file and saves a copy of it
+# next to the model artifact, so a saved score is always traceable back to
+# the exact config that produced it (LLM.md §5).
+
+seed: 42
+
+data:
+  raw_path: data/raw/give-me-some-credit/cs-training.csv
+  test_size: 0.3
+
+binning:
+  # See notebooks/01_eda.ipynb: 96/98 are sentinel/error codes in these three
+  # columns, not literal counts — they get their own bin instead of being
+  # dropped or merged into the ordinary monotonic ordering.
+  special_codes:
+    "NumberOfTime30-59DaysPastDueNotWorse": [96, 98]
+    "NumberOfTime60-89DaysPastDueNotWorse": [96, 98]
+    "NumberOfTimes90DaysLate": [96, 98]
+
+feature_selection:
+  min_iv: 0.02
+  suspicious_iv: 0.5
+
+scorecard:
+  pdo: 20
+  base_score: 600
+  base_odds: 50
+
+evaluation:
+  calibration_bins: 10
+  psi_buckets: 10
